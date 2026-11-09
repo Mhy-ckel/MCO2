@@ -6,18 +6,26 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+// Main screens
 import HomeScreen from "./screens/HomeScreen";
 import ActivitiesScreen from "./screens/ActivitiesScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 
+// Floating navigation component
+import FloatingTabBar from "./components/FloatingTabBar";
+
+// Activity screens
 import UsersScreen from "./activities/activity5/UsersScreen";
 import DashboardTabs from "./activities/activity6/DashboardTabs";
 import NotesScreen from "./activities/activity7/NotesScreen";
+
+// Shared state for Activity 6 and Profile
 import { UserProvider } from "./activities/activity6/UserContext";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+// Stack inside the Activities tab
 function ActivitiesNavigator() {
   return (
     <Stack.Navigator
@@ -32,110 +40,114 @@ function ActivitiesNavigator() {
       <Stack.Screen
         name="ActivitiesList"
         component={ActivitiesScreen}
-        options={{ title: "My Activities" }}
+        options={{
+          title: "My Activities",
+        }}
       />
 
       <Stack.Screen
         name="Activity5"
         component={UsersScreen}
-        options={{ title: "Activity 5: API Data" }}
+        options={{
+          title: "Activity 5: API Data",
+        }}
       />
 
       <Stack.Screen
         name="Activity6"
         component={DashboardTabs}
-        options={{ title: "Activity 6: Dashboard" }}
+        options={{
+          title: "Activity 6: Dashboard",
+        }}
       />
 
       <Stack.Screen
         name="Activity7"
         component={NotesScreen}
-        options={{ title: "Activity 7: Notes" }}
+        options={{
+          title: "Activity 7: Notes",
+        }}
       />
     </Stack.Navigator>
   );
 }
 
+// Main Home / Activities / Profile tabs
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <FloatingTabBar {...props} />}
+      screenOptions={{
+        headerTitleAlign: "left",
+        headerTintColor: "#0F172A",
+        headerStyle: {
+          backgroundColor: "#FFFFFF",
+        },
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={({ navigation }) => ({
+          title: "My Activities",
+          tabBarLabel: "Home",
+
+          headerRight: () => (
+            <Pressable
+              onPress={() =>
+                navigation.navigate("Activities", {
+                  screen: "ActivitiesList",
+                })
+              }
+              accessibilityRole="button"
+              accessibilityLabel="Open activities menu"
+              style={({ pressed }) => ({
+                padding: 12,
+                marginRight: 4,
+                opacity: pressed ? 0.6 : 1,
+              })}
+            >
+              <Text
+                style={{
+                  fontSize: 24,
+                  color: "#0F172A",
+                }}
+              >
+                ☰
+              </Text>
+            </Pressable>
+          ),
+        })}
+      />
+
+      <Tab.Screen
+        name="Activities"
+        component={ActivitiesNavigator}
+        options={{
+          headerShown: false,
+          tabBarLabel: "Activities",
+        }}
+      />
+
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: "Student Profile",
+          tabBarLabel: "Profile",
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+// App entry component
 export default function App() {
   return (
     <SafeAreaProvider>
       <UserProvider>
         <NavigationContainer>
-          <Tab.Navigator
-            screenOptions={{
-              headerTitleAlign: "left",
-              headerTintColor: "#0F172A",
-              headerStyle: {
-                backgroundColor: "#FFFFFF",
-              },
-              tabBarActiveTintColor: "#2563EB",
-              tabBarInactiveTintColor: "#64748B",
-              tabBarStyle: {
-                backgroundColor: "#FFFFFF",
-                borderTopColor: "#E2E8F0",
-              },
-              tabBarLabelStyle: {
-                fontSize: 12,
-                fontWeight: "600",
-              },
-            }}
-          >
-            <Tab.Screen
-              name="Home"
-              component={HomeScreen}
-              options={({ navigation }) => ({
-                title: "My Activities",
-                tabBarLabel: "Home",
-                tabBarIcon: ({ color }) => (
-                  <Text style={{ color, fontSize: 24 }}>⌂</Text>
-                ),
-                headerRight: () => (
-                  <Pressable
-                    onPress={() =>
-                      navigation.navigate("Activities", {
-                        screen: "ActivitiesList",
-                      })
-                    }
-                    accessibilityRole="button"
-                    accessibilityLabel="Open activities menu"
-                    style={{ padding: 12, marginRight: 4 }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 24,
-                        color: "#0F172A",
-                      }}
-                    >
-                      ☰
-                    </Text>
-                  </Pressable>
-                ),
-              })}
-            />
-
-            <Tab.Screen
-              name="Activities"
-              component={ActivitiesNavigator}
-              options={{
-                headerShown: false,
-                tabBarIcon: ({ color }) => (
-                  <Text style={{ color, fontSize: 22 }}>▦</Text>
-                ),
-              }}
-            />
-
-            <Tab.Screen
-              name="Profile"
-              component={ProfileScreen}
-              options={{
-                title: "Student Profile",
-                tabBarLabel: "Profile",
-                tabBarIcon: ({ color }) => (
-                  <Text style={{ color, fontSize: 22 }}>●</Text>
-                ),
-              }}
-            />
-          </Tab.Navigator>
+          <MainTabs />
         </NavigationContainer>
       </UserProvider>
     </SafeAreaProvider>
