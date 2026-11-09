@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
+
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import ActivityCard from "../components/ActivityCard";
 import { activities } from "../data/activities";
+
+import { UserContext } from "../activities/activity6/UserContext";
 import { useAppTheme } from "../theme/useAppTheme";
 
 export default function HomeScreen({ navigation }) {
+  const { displayName } = useContext(UserContext);
   const { hubStyles } = useAppTheme();
 
   function openActivity(route) {
@@ -24,7 +28,7 @@ export default function HomeScreen({ navigation }) {
         <View style={hubStyles.hero}>
           <Text style={hubStyles.eyebrow}>ACTIVITY LIST.</Text>
 
-          <Text style={hubStyles.welcome}>Hello, student!</Text>
+          <Text style={hubStyles.welcome}>Hello, {displayName}!</Text>
 
           <Text style={hubStyles.heroTitle}>Welcome to Activities</Text>
 

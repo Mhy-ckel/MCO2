@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -16,29 +17,37 @@ import { UserContext } from "./UserContext";
 import { useAppTheme } from "../../theme/useAppTheme";
 
 export default function SettingsScreen() {
-  const { displayName, darkMode, saving, updateSettings } =
-    useContext(UserContext);
+  const {
+    displayName,
+    darkMode,
+    saving,
+    nameSaving,
+    updateSettings,
+    profileError,
+    profileMessage,
+    clearProfileFeedback,
+  } = useContext(UserContext);
 
   const { styles, theme } = useAppTheme();
 
   const [nameInput, setNameInput] = useState(displayName);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     setNameInput(displayName);
   }, [displayName]);
 
-  function saveName() {
-    const name = nameInput.trim();
-
-    if (!name) {
-      setError("Please enter a display name.");
+  async function handleSaveName() {
+    if (nameSaving) {
       return;
     }
 
-    setError("");
-    updateSettings({ displayName: name });
-    Keyboard.dismiss();
+    const saved = await updateSettings({
+      displayName: nameInput,
+    });
+
+    if (saved) {
+      Keyboard.dismiss();
+    }
   }
 
   return (
@@ -60,31 +69,71 @@ export default function SettingsScreen() {
               value={nameInput}
               onChangeText={(text) => {
                 setNameInput(text);
-                setError("");
+                clearProfileFeedback();
               }}
               placeholder="Enter your name"
               placeholderTextColor={theme.placeholder}
               selectionColor={theme.accent}
               keyboardAppearance={darkMode ? "dark" : "light"}
+              editable={!nameSaving}
               maxLength={40}
               autoCapitalize="words"
+              returnKeyType="done"
+              onSubmitEditing={handleSaveName}
               accessibilityLabel="Display name"
               style={styles.input}
             />
 
-            {error ? (
+            <Pressable
+              onPress={handleSaveName}
+              disabled={nameSaving}
+              accessibilityRole="button"
+              accessibilityState={{
+                disabled: nameSaving,
+              }}
+              style={({ pressed }) => [
+                styles.button,
+                (pressed || nameSaving) && styles.disabled,
+              ]}
+            >
+              <Text style={styles.buttonText}>
+                {nameSaving ? "Saving..." : "Save Name"}
+              </Text>
+            </Pressable>
+
+            {nameSaving && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 12,
+                }}
+              >
+                <ActivityIndicator size="small" color={theme.accent} />
+
+                <Text
+                  style={[styles.muted, { marginLeft: 8 }]}
+                  accessibilityLiveRegion="polite"
+                >
+                  Saving your name...
+                </Text>
+              </View>
+            )}
+
+            {profileError ? (
               <Text style={styles.error} accessibilityRole="alert">
-                {error}
+                {profileError}
               </Text>
             ) : null}
 
-            <Pressable
-              onPress={saveName}
-              style={styles.button}
-              accessibilityRole="button"
-            >
-              <Text style={styles.buttonText}>Save Name</Text>
-            </Pressable>
+            {profileMessage ? (
+              <Text
+                style={[styles.status, { color: theme.accent }]}
+                accessibilityLiveRegion="polite"
+              >
+                {profileMessage}
+              </Text>
+            ) : null}
           </View>
 
           <View style={[styles.card, styles.row]}>
@@ -98,7 +147,9 @@ export default function SettingsScreen() {
 
             <Switch
               value={darkMode}
-              onValueChange={(value) => updateSettings({ darkMode: value })}
+              onValueChange={(value) => {
+                updateSettings({ darkMode: value });
+              }}
               accessibilityLabel="Dark mode"
               trackColor={{
                 false: "#94A3B8",
