@@ -1,266 +1,273 @@
-import React, { useEffect, useRef, useState } from "react";
-
+import React, { useState, useRef, useEffect } from "react";
 import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
   Animated,
   Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
 } from "react-native";
-
-import { BlurView } from "expo-blur";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { useAppTheme } from "../theme/useAppTheme";
 
-const TAB_ICONS = {
-  Home: {
-    active: "home",
-    inactive: "home-outline",
+const TABS = [
+  {
+    key: "Home",
+    label: "Home",
+    icon: "home-outline",
+    activeIcon: "home",
   },
-  Activities: {
-    active: "grid",
-    inactive: "grid-outline",
+  {
+    key: "Activities",
+    label: "Activities",
+    icon: "grid-outline",
+    activeIcon: "grid",
   },
-  Profile: {
-    active: "person",
-    inactive: "person-outline",
+  {
+    key: "Profile",
+    label: "Profile",
+    icon: "person-outline",
+    activeIcon: "person",
   },
-};
+];
 
-const INNER_PADDING = 6;
-
-export default function FloatingTabBar({ state, descriptors, navigation }) {
-  const { theme, darkMode } = useAppTheme();
+export default function FloatingTabBar({ state, navigation }) {
+  const { theme } = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  const [barWidth, setBarWidth] = useState(0);
-  const indicatorPosition = useRef(new Animated.Value(0)).current;
-
-  const tabWidth =
-    barWidth > 0 ? (barWidth - INNER_PADDING * 2) / state.routes.length : 0;
+  const [activeTab, setActiveTab] = useState("Home");
+  const indicatorX = useRef(new Animated.Value(0)).current;
+  const pillWidth = useRef(0);
 
   useEffect(() => {
-    if (!tabWidth) {
+    const currentRoute = state?.routes?.[state.index]?.name;
+
+    if (currentRoute && TABS.some((tab) => tab.key === currentRoute)) {
+      setActiveTab(currentRoute);
+    }
+  }, [state?.index, state?.routes]);
+
+  useEffect(() => {
+    const index = TABS.findIndex((tab) => tab.key === activeTab);
+
+    if (index === -1 || !pillWidth.current) {
       return;
     }
 
-    const animation = Animated.spring(indicatorPosition, {
-      toValue: state.index * tabWidth,
-      damping: 22,
-      stiffness: 220,
-      mass: 0.8,
+    const tabWidth = pillWidth.current / TABS.length;
+
+    Animated.spring(indicatorX, {
+      toValue: index * tabWidth,
       useNativeDriver: true,
-    });
+      friction: 8,
+      tension: 70,
+    }).start();
+  }, [activeTab, pillWidth.current, indicatorX]);
 
-    animation.start();
+  const handleTabPress = (tabKey) => {
+    setActiveTab(tabKey);
+    navigation.navigate(tabKey);
+  };
 
-    return () => animation.stop();
-  }, [state.index, tabWidth, indicatorPosition]);
+  const handlePillLayout = (event) => {
+    const { width } = event.nativeEvent.layout;
+    pillWidth.current = width;
+
+    const index = TABS.findIndex((tab) => tab.key === activeTab);
+
+    if (index !== -1) {
+      indicatorX.setValue(index * (width / TABS.length));
+    }
+  };
+
+  const colors = {
+    background:
+      theme.tabBarBackground || (theme.isDark ? "#101318" : "#F7F8FB"),
+    pill: theme.tabBarPill || (theme.isDark ? "#1B2028" : "#FFFFFF"),
+    border:
+      theme.tabBarBorder ||
+      (theme.isDark ? "rgba(255, 255, 255, 0.10)" : "rgba(15, 23, 42, 0.08)"),
+    selection: theme.tabBarSelection || (theme.isDark ? "#2A3240" : "#EEF2F8"),
+    active: theme.tabBarActive || (theme.isDark ? "#FFFFFF" : "#111827"),
+    inactive:
+      theme.tabBarInactive ||
+      (theme.isDark ? "rgba(235, 241, 255, 0.62)" : "rgba(17, 24, 39, 0.55)"),
+    highlight: theme.isDark
+      ? "rgba(255, 255, 255, 0.10)"
+      : "rgba(255, 255, 255, 0.90)",
+    lowerHighlight: theme.isDark
+      ? "rgba(255, 255, 255, 0.04)"
+      : "rgba(255, 255, 255, 0.45)",
+    selectionHighlight: theme.isDark
+      ? "rgba(255, 255, 255, 0.14)"
+      : "rgba(255, 255, 255, 0.95)",
+    selectionEdge: theme.isDark
+      ? "rgba(255, 255, 255, 0.10)"
+      : "rgba(15, 23, 42, 0.06)",
+    shadow: theme.isDark ? "#000000" : "#0F172A",
+  };
+
+  const styles = createStyles(colors, insets);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.background,
-          paddingBottom: Math.max(insets.bottom, 12),
-        },
-      ]}
-    >
-      <View
-        style={[
-          styles.shadowContainer,
-          {
-            backgroundColor: theme.surface,
-            shadowColor: theme.shadow,
-          },
-        ]}
-      >
-        <View
+    <View style={styles.navigationArea}>
+      <View style={styles.pill} onLayout={handlePillLayout}>
+        <View style={styles.pillBase} />
+
+        <View style={styles.pillTopHighlight} />
+
+        <View style={styles.pillBottomHighlight} />
+
+        <Animated.View
           style={[
-            styles.pill,
+            styles.selectionIndicator,
             {
-              backgroundColor: theme.pill,
-              borderColor: theme.pillBorder,
+              backgroundColor: colors.selection,
+              transform: [{ translateX: indicatorX }],
             },
           ]}
-          onLayout={(event) => {
-            setBarWidth(event.nativeEvent.layout.width);
-          }}
         >
-          {Platform.OS === "ios" ? (
-            <BlurView
-              intensity={65}
-              tint={darkMode ? "dark" : "light"}
-              pointerEvents="none"
-              style={StyleSheet.absoluteFillObject}
-            />
-          ) : (
-            <View
-              pointerEvents="none"
-              style={[
-                StyleSheet.absoluteFillObject,
-                {
-                  backgroundColor: theme.pillAndroid,
-                },
-              ]}
-            />
-          )}
+          <View style={styles.selectionHighlight} />
+          <View style={styles.selectionEdge} />
+        </Animated.View>
 
-          {tabWidth > 0 && (
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                styles.indicator,
-                {
-                  width: tabWidth,
-                  backgroundColor: theme.selected,
-                  transform: [
-                    {
-                      translateX: indicatorPosition,
-                    },
-                  ],
-                },
-              ]}
-            />
-          )}
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.key;
 
-          <View style={styles.tabs}>
-            {state.routes.map((route, index) => {
-              const focused = state.index === index;
-              const options = descriptors[route.key].options;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              style={styles.tabButton}
+              activeOpacity={0.8}
+              onPress={() => handleTabPress(tab.key)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={tab.label}
+            >
+              <Ionicons
+                name={isActive ? tab.activeIcon : tab.icon}
+                size={22}
+                color={isActive ? colors.active : colors.inactive}
+              />
 
-              const label =
-                typeof options.tabBarLabel === "string"
-                  ? options.tabBarLabel
-                  : route.name;
-
-              const icons = TAB_ICONS[route.name] || {
-                active: "ellipse",
-                inactive: "ellipse-outline",
-              };
-
-              function handlePress() {
-                const event = navigation.emit({
-                  type: "tabPress",
-                  target: route.key,
-                  canPreventDefault: true,
-                });
-
-                if (!focused && !event.defaultPrevented) {
-                  navigation.navigate(route.name, route.params);
-                }
-              }
-
-              return (
-                <Pressable
-                  key={route.key}
-                  onPress={handlePress}
-                  onLongPress={() => {
-                    navigation.emit({
-                      type: "tabLongPress",
-                      target: route.key,
-                    });
-                  }}
-                  accessibilityRole="tab"
-                  accessibilityState={{
-                    selected: focused,
-                  }}
-                  accessibilityLabel={
-                    options.tabBarAccessibilityLabel || `${label} tab`
-                  }
-                  style={({ pressed }) => [
-                    styles.tab,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Ionicons
-                    name={focused ? icons.active : icons.inactive}
-                    size={22}
-                    color={focused ? theme.accent : theme.secondary}
-                  />
-
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      styles.label,
-                      {
-                        color: focused ? theme.accent : theme.secondary,
-                        fontWeight: focused ? "700" : "500",
-                      },
-                    ]}
-                  >
-                    {label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
+              <Text
+                style={[
+                  styles.tabLabel,
+                  {
+                    color: isActive ? colors.active : colors.inactive,
+                  },
+                ]}
+              >
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    paddingTop: 10,
-    paddingHorizontal: 18,
-  },
-
-  shadowContainer: {
-    width: "100%",
-    maxWidth: 420,
-    borderRadius: 36,
-    shadowOffset: {
-      width: 0,
-      height: 5,
+const createStyles = (colors, insets) =>
+  StyleSheet.create({
+    navigationArea: {
+      width: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingTop: 10,
+      paddingBottom: Math.max(insets.bottom, 14),
+      backgroundColor: colors.background,
+      flexShrink: 0,
     },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-
-  pill: {
-    height: 70,
-    borderRadius: 36,
-    overflow: "hidden",
-    borderWidth: 1,
-  },
-
-  tabs: {
-    flex: 1,
-    flexDirection: "row",
-    padding: INNER_PADDING,
-  },
-
-  tab: {
-    flex: 1,
-    minWidth: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 30,
-  },
-
-  indicator: {
-    position: "absolute",
-    top: INNER_PADDING,
-    bottom: INNER_PADDING,
-    left: INNER_PADDING,
-    borderRadius: 30,
-  },
-
-  label: {
-    marginTop: 4,
-    fontSize: 11,
-  },
-
-  pressed: {
-    opacity: 0.65,
-    transform: [{ scale: 0.96 }],
-  },
-});
+    pill: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      width: "88%",
+      maxWidth: 430,
+      height: 66,
+      borderRadius: 33,
+      backgroundColor: colors.pill,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 8,
+      overflow: "hidden",
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.shadow,
+          shadowOpacity: 0.16,
+          shadowRadius: 18,
+          shadowOffset: {
+            width: 0,
+            height: 8,
+          },
+        },
+        android: {
+          elevation: 8,
+        },
+      }),
+    },
+    pillBase: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: colors.pill,
+    },
+    pillTopHighlight: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: "52%",
+      backgroundColor: colors.highlight,
+      opacity: 0.35,
+    },
+    pillBottomHighlight: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: "30%",
+      backgroundColor: colors.lowerHighlight,
+      opacity: 0.18,
+    },
+    selectionIndicator: {
+      position: "absolute",
+      top: 6,
+      bottom: 6,
+      left: 6,
+      width: "33.333%",
+      borderRadius: 27,
+      overflow: "hidden",
+    },
+    selectionHighlight: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: "55%",
+      backgroundColor: colors.selectionHighlight,
+      opacity: 0.55,
+    },
+    selectionEdge: {
+      position: "absolute",
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      borderRadius: 27,
+      borderWidth: 1,
+      borderColor: colors.selectionEdge,
+    },
+    tabButton: {
+      flex: 1,
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 3,
+    },
+    tabLabel: {
+      fontSize: 11,
+      fontWeight: "600",
+      letterSpacing: 0.2,
+    },
+  });
