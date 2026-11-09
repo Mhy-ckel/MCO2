@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
+
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 
-import { styles } from "../../styles";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 const API_URL = "https://jsonplaceholder.typicode.com/users";
 
 export default function UsersScreen() {
+  const { styles, theme } = useAppTheme();
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -60,7 +63,8 @@ export default function UsersScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={theme.accent} />
+
         <Text style={styles.status}>Loading users...</Text>
       </View>
     );
@@ -70,7 +74,9 @@ export default function UsersScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.cardTitle}>Unable to load users</Text>
+
         <Text style={styles.error}>{error}</Text>
+
         <Text style={styles.muted}>
           Check your connection, then go back and reopen this activity.
         </Text>
@@ -87,6 +93,7 @@ export default function UsersScreen() {
       ListHeaderComponent={
         <View>
           <Text style={styles.title}>API Users</Text>
+
           <Text style={styles.description}>
             These records were loaded from JSONPlaceholder.
           </Text>
@@ -96,7 +103,9 @@ export default function UsersScreen() {
       renderItem={({ item }) => (
         <View style={[styles.card, styles.page]}>
           <Text style={styles.cardTitle}>{item.name}</Text>
+
           <Text style={styles.text}>{item.email}</Text>
+
           <Text style={styles.muted}>@{item.username}</Text>
         </View>
       )}

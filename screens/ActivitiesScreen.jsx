@@ -3,9 +3,11 @@ import { ScrollView, Text, View } from "react-native";
 
 import ActivityCard from "../components/ActivityCard";
 import { activities } from "../data/activities";
-import { hubStyles } from "../hubStyles";
+import { useAppTheme } from "../theme/useAppTheme";
 
 export default function ActivitiesScreen({ navigation }) {
+  const { hubStyles } = useAppTheme();
+
   return (
     <ScrollView
       style={hubStyles.screen}

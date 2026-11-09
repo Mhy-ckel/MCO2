@@ -13,6 +13,8 @@ import { BlurView } from "expo-blur";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useAppTheme } from "../theme/useAppTheme";
+
 const TAB_ICONS = {
   Home: {
     active: "home",
@@ -28,22 +30,20 @@ const TAB_ICONS = {
   },
 };
 
-const BAR_HEIGHT = 70;
 const INNER_PADDING = 6;
 
 export default function FloatingTabBar({ state, descriptors, navigation }) {
+  const { theme, darkMode } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   const [barWidth, setBarWidth] = useState(0);
   const indicatorPosition = useRef(new Animated.Value(0)).current;
 
-  const bottomSpacing = Math.max(insets.bottom, 12);
-
   const tabWidth =
     barWidth > 0 ? (barWidth - INNER_PADDING * 2) / state.routes.length : 0;
 
   useEffect(() => {
-    if (tabWidth === 0) {
+    if (!tabWidth) {
       return;
     }
 
@@ -61,10 +61,32 @@ export default function FloatingTabBar({ state, descriptors, navigation }) {
   }, [state.index, tabWidth, indicatorPosition]);
 
   return (
-    <View style={[styles.container, { paddingBottom: bottomSpacing }]}>
-      <View style={styles.shadowContainer}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.background,
+          paddingBottom: Math.max(insets.bottom, 12),
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.shadowContainer,
+          {
+            backgroundColor: theme.surface,
+            shadowColor: theme.shadow,
+          },
+        ]}
+      >
         <View
-          style={styles.pill}
+          style={[
+            styles.pill,
+            {
+              backgroundColor: theme.pill,
+              borderColor: theme.pillBorder,
+            },
+          ]}
           onLayout={(event) => {
             setBarWidth(event.nativeEvent.layout.width);
           }}
@@ -72,14 +94,19 @@ export default function FloatingTabBar({ state, descriptors, navigation }) {
           {Platform.OS === "ios" ? (
             <BlurView
               intensity={65}
-              tint="light"
+              tint={darkMode ? "dark" : "light"}
               pointerEvents="none"
               style={StyleSheet.absoluteFillObject}
             />
           ) : (
             <View
               pointerEvents="none"
-              style={[StyleSheet.absoluteFillObject, styles.androidBackground]}
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  backgroundColor: theme.pillAndroid,
+                },
+              ]}
             />
           )}
 
@@ -90,7 +117,12 @@ export default function FloatingTabBar({ state, descriptors, navigation }) {
                 styles.indicator,
                 {
                   width: tabWidth,
-                  transform: [{ translateX: indicatorPosition }],
+                  backgroundColor: theme.selected,
+                  transform: [
+                    {
+                      translateX: indicatorPosition,
+                    },
+                  ],
                 },
               ]}
             />
@@ -123,18 +155,16 @@ export default function FloatingTabBar({ state, descriptors, navigation }) {
                 }
               }
 
-              function handleLongPress() {
-                navigation.emit({
-                  type: "tabLongPress",
-                  target: route.key,
-                });
-              }
-
               return (
                 <Pressable
                   key={route.key}
                   onPress={handlePress}
-                  onLongPress={handleLongPress}
+                  onLongPress={() => {
+                    navigation.emit({
+                      type: "tabLongPress",
+                      target: route.key,
+                    });
+                  }}
                   accessibilityRole="tab"
                   accessibilityState={{
                     selected: focused,
@@ -150,12 +180,18 @@ export default function FloatingTabBar({ state, descriptors, navigation }) {
                   <Ionicons
                     name={focused ? icons.active : icons.inactive}
                     size={22}
-                    color={focused ? "#2563EB" : "#64748B"}
+                    color={focused ? theme.accent : theme.secondary}
                   />
 
                   <Text
                     numberOfLines={1}
-                    style={[styles.label, focused && styles.activeLabel]}
+                    style={[
+                      styles.label,
+                      {
+                        color: focused ? theme.accent : theme.secondary,
+                        fontWeight: focused ? "700" : "500",
+                      },
+                    ]}
                   >
                     {label}
                   </Text>
@@ -174,37 +210,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 10,
     paddingHorizontal: 18,
-    backgroundColor: "#F1F5F9",
   },
 
   shadowContainer: {
     width: "100%",
     maxWidth: 420,
     borderRadius: 36,
-    backgroundColor: "#FFFFFF",
-
-    shadowColor: "#0F172A",
     shadowOffset: {
       width: 0,
       height: 5,
     },
     shadowOpacity: 0.12,
     shadowRadius: 12,
-
     elevation: 8,
   },
 
   pill: {
-    height: BAR_HEIGHT,
+    height: 70,
     borderRadius: 36,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.9)",
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
-  },
-
-  androidBackground: {
-    backgroundColor: "rgba(255, 255, 255, 0.94)",
   },
 
   tabs: {
@@ -227,19 +252,11 @@ const styles = StyleSheet.create({
     bottom: INNER_PADDING,
     left: INNER_PADDING,
     borderRadius: 30,
-    backgroundColor: "#DBEAFE",
   },
 
   label: {
     marginTop: 4,
     fontSize: 11,
-    fontWeight: "500",
-    color: "#64748B",
-  },
-
-  activeLabel: {
-    color: "#2563EB",
-    fontWeight: "700",
   },
 
   pressed: {

@@ -2,10 +2,11 @@ import React, { useContext } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { UserContext } from "../activities/activity6/UserContext";
-import { hubStyles } from "../hubStyles";
+import { useAppTheme } from "../theme/useAppTheme";
 
 export default function ProfileScreen({ navigation }) {
   const { displayName, darkMode } = useContext(UserContext);
+  const { hubStyles, theme } = useAppTheme();
 
   return (
     <ScrollView
@@ -34,7 +35,7 @@ export default function ProfileScreen({ navigation }) {
 
           <Text style={hubStyles.infoValue}>{displayName}</Text>
 
-          <Text style={hubStyles.infoLabel}>Activity 6 appearance</Text>
+          <Text style={hubStyles.infoLabel}>App appearance</Text>
 
           <Text style={hubStyles.infoValue}>
             {darkMode ? "Dark Mode" : "Light Mode"}
@@ -58,7 +59,9 @@ export default function ProfileScreen({ navigation }) {
             accessibilityRole="button"
             style={({ pressed }) => [
               hubStyles.cardButton,
-              { backgroundColor: "#2563EB" },
+              {
+                backgroundColor: theme.button,
+              },
               pressed && hubStyles.pressed,
             ]}
           >

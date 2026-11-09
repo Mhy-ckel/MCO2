@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+
 import {
   ActivityIndicator,
   FlatList,
@@ -12,11 +13,13 @@ import {
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { styles } from "../../styles";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 const STORAGE_KEY = "@activityhub_notes";
 
 export default function NotesScreen() {
+  const { styles, theme, darkMode } = useAppTheme();
+
   const [notes, setNotes] = useState([]);
   const [text, setText] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -34,9 +37,12 @@ export default function NotesScreen() {
   }, []);
 
   async function loadNotes() {
-    if (busyRef.current) return;
+    if (busyRef.current) {
+      return;
+    }
 
     busyRef.current = true;
+
     setLoading(true);
     setError("");
     setLoadFailed(false);
@@ -70,9 +76,12 @@ export default function NotesScreen() {
   }
 
   async function persistNotes(updatedNotes) {
-    if (busyRef.current || loading || loadFailed) return false;
+    if (busyRef.current || loading || loadFailed) {
+      return false;
+    }
 
     busyRef.current = true;
+
     setSaving(true);
     setError("");
 
@@ -83,6 +92,7 @@ export default function NotesScreen() {
       return true;
     } catch {
       setError("Could not save your changes. Please try again.");
+
       return false;
     } finally {
       busyRef.current = false;
@@ -101,7 +111,12 @@ export default function NotesScreen() {
     const updatedNotes =
       editingId !== null
         ? notes.map((note) =>
-            note.id === editingId ? { ...note, text: cleanedText } : note,
+            note.id === editingId
+              ? {
+                  ...note,
+                  text: cleanedText,
+                }
+              : note,
           )
         : [
             {
@@ -127,6 +142,7 @@ export default function NotesScreen() {
     setText(note.text);
     setEditingId(note.id);
     setError("");
+
     inputRef.current?.focus();
   }
 
@@ -139,6 +155,7 @@ export default function NotesScreen() {
 
   async function deleteNote(id) {
     const updatedNotes = notes.filter((note) => note.id !== id);
+
     const saved = await persistNotes(updatedNotes);
 
     if (saved && editingId === id) {
@@ -149,7 +166,8 @@ export default function NotesScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={theme.accent} />
+
         <Text style={styles.status}>Loading saved notes...</Text>
       </View>
     );
@@ -191,7 +209,9 @@ export default function NotesScreen() {
             setError("");
           }}
           placeholder="Enter your note..."
-          placeholderTextColor="#64748B"
+          placeholderTextColor={theme.placeholder}
+          selectionColor={theme.accent}
+          keyboardAppearance={darkMode ? "dark" : "light"}
           multiline
           editable={!saving}
           accessibilityLabel="Note text"
@@ -224,7 +244,11 @@ export default function NotesScreen() {
           </Pressable>
         )}
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? (
+          <Text style={styles.error} accessibilityRole="alert">
+            {error}
+          </Text>
+        ) : null}
 
         <Text style={[styles.cardTitle, styles.spacer]}>
           Saved Notes ({notes.length})
@@ -235,7 +259,9 @@ export default function NotesScreen() {
           data={notes}
           keyExtractor={(item) => item.id}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={{
+            paddingBottom: 24,
+          }}
           ListEmptyComponent={
             <Text style={styles.status}>No notes yet. Add one above.</Text>
           }

@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -12,16 +13,16 @@ import {
 } from "react-native";
 
 import { UserContext } from "./UserContext";
-import { styles, themes } from "../../styles";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 export default function SettingsScreen() {
   const { displayName, darkMode, saving, updateSettings } =
     useContext(UserContext);
 
+  const { styles, theme } = useAppTheme();
+
   const [nameInput, setNameInput] = useState(displayName);
   const [error, setError] = useState("");
-
-  const theme = darkMode ? themes.dark : themes.light;
 
   useEffect(() => {
     setNameInput(displayName);
@@ -42,7 +43,7 @@ export default function SettingsScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.screen, { backgroundColor: theme.background }]}
+      style={styles.screen}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
@@ -50,22 +51,10 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.page}>
-          <Text style={[styles.title, { color: theme.text }]}>
-            Profile Settings
-          </Text>
+          <Text style={styles.title}>Profile Settings</Text>
 
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-              },
-            ]}
-          >
-            <Text style={[styles.label, { color: theme.text }]}>
-              Display name
-            </Text>
+          <View style={styles.card}>
+            <Text style={styles.label}>Display name</Text>
 
             <TextInput
               value={nameInput}
@@ -74,27 +63,17 @@ export default function SettingsScreen() {
                 setError("");
               }}
               placeholder="Enter your name"
-              placeholderTextColor={theme.secondary}
+              placeholderTextColor={theme.placeholder}
+              selectionColor={theme.accent}
+              keyboardAppearance={darkMode ? "dark" : "light"}
               maxLength={40}
               autoCapitalize="words"
               accessibilityLabel="Display name"
-              style={[
-                styles.input,
-                {
-                  color: theme.text,
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                },
-              ]}
+              style={styles.input}
             />
 
             {error ? (
-              <Text
-                style={[
-                  styles.error,
-                  { color: darkMode ? "#FCA5A5" : "#B91C1C" },
-                ]}
-              >
+              <Text style={styles.error} accessibilityRole="alert">
                 {error}
               </Text>
             ) : null}
@@ -108,22 +87,11 @@ export default function SettingsScreen() {
             </Pressable>
           </View>
 
-          <View
-            style={[
-              styles.card,
-              styles.row,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-              },
-            ]}
-          >
+          <View style={[styles.card, styles.row]}>
             <View style={styles.flex}>
-              <Text style={[styles.cardTitle, { color: theme.text }]}>
-                Dark mode
-              </Text>
+              <Text style={styles.cardTitle}>Dark mode</Text>
 
-              <Text style={[styles.muted, { color: theme.secondary }]}>
+              <Text style={styles.muted}>
                 {darkMode ? "Enabled" : "Disabled"}
               </Text>
             </View>
@@ -134,16 +102,13 @@ export default function SettingsScreen() {
               accessibilityLabel="Dark mode"
               trackColor={{
                 false: "#94A3B8",
-                true: "#2563EB",
+                true: theme.button,
               }}
-              thumbColor="#FFFFFF"
+              thumbColor={theme.buttonText}
             />
           </View>
 
-          <Text
-            style={[styles.status, { color: theme.secondary }]}
-            accessibilityLiveRegion="polite"
-          >
+          <Text style={styles.status} accessibilityLiveRegion="polite">
             {saving ? "Saving..." : `Current name: ${displayName}`}
           </Text>
         </View>

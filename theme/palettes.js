@@ -1,0 +1,73 @@
+export const themes = {
+  light: {
+    background: "#F1F5F9",
+    surface: "#FFFFFF",
+    text: "#0F172A",
+    secondary: "#475569",
+    border: "#CBD5E1",
+    accent: "#2563EB",
+    button: "#2563EB",
+    buttonText: "#FFFFFF",
+    input: "#FFFFFF",
+    placeholder: "#64748B",
+    label: "#334155",
+    error: "#B91C1C",
+
+    editBackground: "#DBEAFE",
+    editText: "#1D4ED8",
+    deleteBackground: "#FEE2E2",
+    deleteText: "#B91C1C",
+
+    hubSecondary: "#64748B",
+    hubBorder: "#E2E8F0",
+
+    hero: "#1E3A8A",
+    heroEyebrow: "#BFDBFE",
+    heroText: "#FFFFFF",
+    heroSecondary: "#DBEAFE",
+    heroButton: "#FFFFFF",
+    heroButtonText: "#1E3A8A",
+
+    pill: "rgba(255,255,255,0.82)",
+    pillAndroid: "rgba(255,255,255,0.94)",
+    pillBorder: "rgba(255,255,255,0.9)",
+    selected: "#DBEAFE",
+    shadow: "#0F172A",
+  },
+
+  dark: {
+    background: "#151B26",
+    surface: "#222C3B",
+    text: "#F1F5F9",
+    secondary: "#CBD5E1",
+    border: "#435066",
+    accent: "#93C5FD",
+    button: "#2563EB",
+    buttonText: "#FFFFFF",
+    input: "#192231",
+    placeholder: "#AAB8CB",
+    label: "#CBD5E1",
+    error: "#FCA5A5",
+
+    editBackground: "#243F62",
+    editText: "#BFDBFE",
+    deleteBackground: "#542B35",
+    deleteText: "#FECACA",
+
+    hubSecondary: "#CBD5E1",
+    hubBorder: "#435066",
+
+    hero: "#233858",
+    heroEyebrow: "#BFDBFE",
+    heroText: "#F1F5F9",
+    heroSecondary: "#D5E3F5",
+    heroButton: "#314D75",
+    heroButtonText: "#F1F5F9",
+
+    pill: "rgba(34,44,59,0.88)",
+    pillAndroid: "rgba(34,44,59,0.97)",
+    pillBorder: "rgba(148,163,184,0.25)",
+    selected: "#30496B",
+    shadow: "#070C14",
+  },
+};

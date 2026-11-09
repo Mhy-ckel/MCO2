@@ -1,87 +1,100 @@
-import React from "react";
-import { Pressable, Text } from "react-native";
+import React, { useContext } from "react";
 
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StatusBar,
+  Text,
+  View,
+} from "react-native";
+
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from "@react-navigation/native";
+
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
-// Main screens
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+
 import HomeScreen from "./screens/HomeScreen";
 import ActivitiesScreen from "./screens/ActivitiesScreen";
 import ProfileScreen from "./screens/ProfileScreen";
-
-// Floating navigation component
 import FloatingTabBar from "./components/FloatingTabBar";
 
-// Activity screens
 import UsersScreen from "./activities/activity5/UsersScreen";
 import DashboardTabs from "./activities/activity6/DashboardTabs";
 import NotesScreen from "./activities/activity7/NotesScreen";
 
-// Shared state for Activity 6 and Profile
-import { UserProvider } from "./activities/activity6/UserContext";
+import { UserContext, UserProvider } from "./activities/activity6/UserContext";
+
+import { useAppTheme } from "./theme/useAppTheme";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// Stack inside the Activities tab
 function ActivitiesNavigator() {
+  const { theme } = useAppTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerTitleAlign: "center",
-        headerTintColor: "#0F172A",
+        headerTintColor: theme.text,
         headerStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: theme.surface,
+        },
+        contentStyle: {
+          backgroundColor: theme.background,
         },
       }}
     >
       <Stack.Screen
         name="ActivitiesList"
         component={ActivitiesScreen}
-        options={{
-          title: "My Activities",
-        }}
+        options={{ title: "My Activities" }}
       />
 
       <Stack.Screen
         name="Activity5"
         component={UsersScreen}
-        options={{
-          title: "Activity 5: API Data",
-        }}
+        options={{ title: "Activity 5: API Data" }}
       />
 
       <Stack.Screen
         name="Activity6"
         component={DashboardTabs}
-        options={{
-          title: "Activity 6: Dashboard",
-        }}
+        options={{ title: "Activity 6: Dashboard" }}
       />
 
       <Stack.Screen
         name="Activity7"
         component={NotesScreen}
-        options={{
-          title: "Activity 7: Notes",
-        }}
+        options={{ title: "Activity 7: Notes" }}
       />
     </Stack.Navigator>
   );
 }
 
-// Main Home / Activities / Profile tabs
 function MainTabs() {
+  const { theme } = useAppTheme();
+
   return (
     <Tab.Navigator
       tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
         headerTitleAlign: "left",
-        headerTintColor: "#0F172A",
+        headerTintColor: theme.text,
         headerStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: theme.surface,
+        },
+        sceneStyle: {
+          backgroundColor: theme.background,
         },
       }}
     >
@@ -110,7 +123,7 @@ function MainTabs() {
               <Text
                 style={{
                   fontSize: 24,
-                  color: "#0F172A",
+                  color: theme.text,
                 }}
               >
                 ☰
@@ -141,14 +154,87 @@ function MainTabs() {
   );
 }
 
-// App entry component
+function ThemedApplication() {
+  const { themeReady, themeError } = useContext(UserContext);
+  const { darkMode, theme } = useAppTheme();
+  const insets = useSafeAreaInsets();
+
+  const baseTheme = darkMode ? DarkTheme : DefaultTheme;
+
+  const navigationTheme = {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      primary: theme.accent,
+      background: theme.background,
+      card: theme.surface,
+      text: theme.text,
+      border: theme.border,
+      notification: theme.error,
+    },
+  };
+
+  if (!themeReady) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#222C3B",
+        }}
+      >
+        <StatusBar barStyle="light-content" />
+
+        <ActivityIndicator size="large" color="#BFDBFE" />
+
+        <Text
+          style={{
+            color: "#F1F5F9",
+            marginTop: 12,
+          }}
+        >
+          Loading appearance...
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.background,
+      }}
+    >
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
+
+      <NavigationContainer theme={navigationTheme}>
+        <MainTabs />
+      </NavigationContainer>
+
+      {themeError ? (
+        <Text
+          accessibilityRole="alert"
+          style={{
+            color: theme.error,
+            backgroundColor: theme.surface,
+            padding: 12,
+            paddingBottom: Math.max(insets.bottom, 12),
+          }}
+        >
+          {themeError}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 export default function App() {
   return (
     <SafeAreaProvider>
       <UserProvider>
-        <NavigationContainer>
-          <MainTabs />
-        </NavigationContainer>
+        <ThemedApplication />
       </UserProvider>
     </SafeAreaProvider>
   );
