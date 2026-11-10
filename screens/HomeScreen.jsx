@@ -46,6 +46,7 @@ export default function HomeScreen({ navigation }) {
     recentActivityIds,
     progressReady,
     progressError,
+    toggleActivityCompletion,
     clearProgressError,
   } = useActivityProgress();
 

@@ -4,10 +4,13 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import ActivityCard from "../components/ActivityCard";
 import { activities } from "../data/activities";
+
+import { useActivityProgress } from "../context/ActivityProgressContext";
 import { useAppTheme } from "../theme/useAppTheme";
 
 export default function ActivitiesScreen({ navigation }) {
   const { hubStyles } = useAppTheme();
+  const { recordActivityAccessed } = useActivityProgress();
   const tabBarHeight = useBottomTabBarHeight();
 
   return (
@@ -29,7 +32,10 @@ export default function ActivitiesScreen({ navigation }) {
           <ActivityCard
             key={activity.number}
             activity={activity}
-            onOpen={() => navigation.navigate(activity.route)}
+            onOpen={() => {
+              recordActivityAccessed(activity.number);
+              navigation.navigate(activity.route);
+            }}
           />
         ))}
       </View>
