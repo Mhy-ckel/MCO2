@@ -1,5 +1,6 @@
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import ActivityCard from "../components/ActivityCard";
 import { activities } from "../data/activities";
@@ -7,11 +8,15 @@ import { useAppTheme } from "../theme/useAppTheme";
 
 export default function ActivitiesScreen({ navigation }) {
   const { hubStyles } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
 
   return (
     <ScrollView
       style={hubStyles.screen}
-      contentContainerStyle={hubStyles.scrollContent}
+      contentContainerStyle={[
+        hubStyles.scrollContent,
+        { paddingBottom: tabBarHeight + 16 },
+      ]}
     >
       <View style={hubStyles.page}>
         <Text style={hubStyles.sectionTitle}>All Activities</Text>

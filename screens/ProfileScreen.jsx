@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import { UserContext } from "../activities/activity6/UserContext";
 import { useAppTheme } from "../theme/useAppTheme";
@@ -7,11 +8,15 @@ import { useAppTheme } from "../theme/useAppTheme";
 export default function ProfileScreen({ navigation }) {
   const { displayName, darkMode } = useContext(UserContext);
   const { hubStyles, theme } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
 
   return (
     <ScrollView
       style={hubStyles.screen}
-      contentContainerStyle={hubStyles.scrollContent}
+      contentContainerStyle={[
+        hubStyles.scrollContent,
+        { paddingBottom: tabBarHeight + 16 },
+      ]}
     >
       <View style={hubStyles.page}>
         <View style={hubStyles.profileCard}>

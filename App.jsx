@@ -32,6 +32,7 @@ import DashboardTabs from "./activities/activity6/DashboardTabs";
 import NotesScreen from "./activities/activity7/NotesScreen";
 
 import { UserContext, UserProvider } from "./activities/activity6/UserContext";
+import { ActivityProgressProvider } from "./context/ActivityProgressContext";
 
 import { useAppTheme } from "./theme/useAppTheme";
 
@@ -233,9 +234,11 @@ function ThemedApplication() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <UserProvider>
-        <ThemedApplication />
-      </UserProvider>
+      <ActivityProgressProvider>
+        <UserProvider>
+          <ThemedApplication />
+        </UserProvider>
+      </ActivityProgressProvider>
     </SafeAreaProvider>
   );
 }

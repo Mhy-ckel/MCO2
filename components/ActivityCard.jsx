@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { useAppTheme } from "../theme/useAppTheme";
 
@@ -18,8 +19,13 @@ const DARK_BADGES = {
   },
 };
 
-export default function ActivityCard({ activity, onOpen }) {
-  const { hubStyles, darkMode } = useAppTheme();
+export default function ActivityCard({
+  activity,
+  onOpen,
+  completed = false,
+  onToggleComplete,
+}) {
+  const { hubStyles, darkMode, theme } = useAppTheme();
 
   const badge = darkMode
     ? DARK_BADGES[activity.number] || {
@@ -33,17 +39,47 @@ export default function ActivityCard({ activity, onOpen }) {
 
   return (
     <View style={hubStyles.card}>
-      <View
-        style={[
-          hubStyles.badge,
-          {
-            backgroundColor: badge.background,
-          },
-        ]}
-      >
-        <Text style={[hubStyles.badgeText, { color: badge.text }]}>
-          ACTIVITY {activity.number}
-        </Text>
+      <View style={dashboardCardStyles.cardHeader}>
+        <View
+          style={[
+            hubStyles.badge,
+            {
+              backgroundColor: badge.background,
+            },
+          ]}
+        >
+          <Text style={[hubStyles.badgeText, { color: badge.text }]}>
+            ACTIVITY {activity.number}
+          </Text>
+        </View>
+
+        {onToggleComplete ? (
+          <Pressable
+            onPress={onToggleComplete}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: completed }}
+            accessibilityLabel={
+              completed
+                ? `Mark Activity ${activity.number} as not complete`
+                : `Mark Activity ${activity.number} as complete`
+            }
+            hitSlop={10}
+            style={({ pressed }) => [
+              dashboardCardStyles.completeButton,
+              {
+                borderColor: theme.border,
+                backgroundColor: completed ? "#047857" : "transparent",
+              },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Ionicons
+              name={completed ? "checkmark" : "ellipse-outline"}
+              size={18}
+              color={completed ? "#FFFFFF" : theme.text}
+            />
+          </Pressable>
+        ) : null}
       </View>
 
       <Text style={hubStyles.cardTitle}>{activity.title}</Text>
@@ -67,3 +103,20 @@ export default function ActivityCard({ activity, onOpen }) {
     </View>
   );
 }
+
+const dashboardCardStyles = StyleSheet.create({
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  completeButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+  },
+});
