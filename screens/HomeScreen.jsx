@@ -15,6 +15,7 @@ import { activities } from "../data/activities";
 
 import { UserContext } from "../activities/activity6/UserContext";
 import { useActivityProgress } from "../context/ActivityProgressContext";
+import { useFocusTimer } from "../context/FocusTimerContext";
 import { useAppTheme } from "../theme/useAppTheme";
 
 function getGreeting() {
@@ -49,6 +50,13 @@ export default function HomeScreen({ navigation }) {
     toggleActivityCompletion,
     clearProgressError,
   } = useActivityProgress();
+
+  const {
+    todayFocusMinutes,
+    completedFocusSessions,
+    dailyGoalProgress,
+    settings,
+  } = useFocusTimer();
 
   const { hubStyles, theme } = useAppTheme();
   const tabBarHeight = useBottomTabBarHeight();
@@ -273,6 +281,72 @@ export default function HomeScreen({ navigation }) {
           </Text>
         </View>
 
+        <View style={dashboardStyles.focusCard}>
+          <View style={dashboardStyles.focusHeader}>
+            <View>
+              <Text style={dashboardStyles.focusTitle}>Focus Timer</Text>
+
+              <Text style={dashboardStyles.focusDescription}>
+                {todayFocusMinutes} of {settings.dailyGoalMinutes} focus minutes
+                completed today
+              </Text>
+            </View>
+
+            <Pressable
+              onPress={() =>
+                navigation.navigate("Activities", {
+                  screen: "FocusTimer",
+                })
+              }
+              accessibilityRole="button"
+              accessibilityLabel="Open Focus Timer"
+              style={({ pressed }) => [
+                dashboardStyles.focusButton,
+                pressed && dashboardStyles.pressedFocusButton,
+              ]}
+            >
+              <Text style={dashboardStyles.focusButtonText}>Open</Text>
+            </Pressable>
+          </View>
+
+          <View style={dashboardStyles.focusStats}>
+            <View>
+              <Text style={dashboardStyles.focusStatValue}>
+                {todayFocusMinutes}
+              </Text>
+
+              <Text style={dashboardStyles.focusStatLabel}>Focus minutes</Text>
+            </View>
+
+            <View>
+              <Text style={dashboardStyles.focusStatValue}>
+                {completedFocusSessions}
+              </Text>
+
+              <Text style={dashboardStyles.focusStatLabel}>Sessions</Text>
+            </View>
+
+            <View>
+              <Text style={dashboardStyles.focusStatValue}>
+                {dailyGoalProgress}%
+              </Text>
+
+              <Text style={dashboardStyles.focusStatLabel}>Daily goal</Text>
+            </View>
+          </View>
+
+          <View style={dashboardStyles.focusProgressTrack}>
+            <View
+              style={[
+                dashboardStyles.focusProgressFill,
+                {
+                  width: `${dailyGoalProgress}%`,
+                },
+              ]}
+            />
+          </View>
+        </View>
+
         <View style={dashboardStyles.sectionHeader}>
           <Text style={dashboardStyles.sectionTitle}>Quick Actions</Text>
         </View>
@@ -481,6 +555,74 @@ const createDashboardStyles = (theme) =>
       color: theme.text,
       opacity: 0.7,
       lineHeight: 18,
+    },
+    focusCard: {
+      backgroundColor: theme.surface,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: theme.border,
+      padding: 18,
+      gap: 14,
+    },
+    focusHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    focusTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.text,
+    },
+    focusDescription: {
+      fontSize: 13,
+      color: theme.text,
+      opacity: 0.7,
+      marginTop: 3,
+    },
+    focusButton: {
+      backgroundColor: theme.accent,
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+    },
+    pressedFocusButton: {
+      opacity: 0.75,
+      transform: [{ scale: 0.98 }],
+    },
+    focusButtonText: {
+      color: "#FFFFFF",
+      fontSize: 13,
+      fontWeight: "700",
+    },
+    focusStats: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    focusStatValue: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: theme.text,
+    },
+    focusStatLabel: {
+      fontSize: 11,
+      fontWeight: "600",
+      color: theme.text,
+      opacity: 0.65,
+      marginTop: 2,
+    },
+    focusProgressTrack: {
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: theme.background,
+      borderWidth: 1,
+      borderColor: theme.border,
+      overflow: "hidden",
+    },
+    focusProgressFill: {
+      height: "100%",
+      backgroundColor: "#047857",
     },
     sectionHeader: {
       marginTop: 6,

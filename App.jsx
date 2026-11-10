@@ -25,6 +25,7 @@ import {
 import HomeScreen from "./screens/HomeScreen";
 import ActivitiesScreen from "./screens/ActivitiesScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+import FocusTimerScreen from "./screens/FocusTimerScreen";
 import FloatingTabBar from "./components/FloatingTabBar";
 
 import UsersScreen from "./activities/activity5/UsersScreen";
@@ -33,6 +34,7 @@ import NotesScreen from "./activities/activity7/NotesScreen";
 
 import { UserContext, UserProvider } from "./activities/activity6/UserContext";
 import { ActivityProgressProvider } from "./context/ActivityProgressContext";
+import { FocusTimerProvider } from "./context/FocusTimerContext";
 
 import { useAppTheme } from "./theme/useAppTheme";
 
@@ -77,6 +79,12 @@ function ActivitiesNavigator() {
         name="Activity7"
         component={NotesScreen}
         options={{ title: "Activity 7: Notes" }}
+      />
+
+      <Stack.Screen
+        name="FocusTimer"
+        component={FocusTimerScreen}
+        options={{ title: "Focus Timer" }}
       />
     </Stack.Navigator>
   );
@@ -235,9 +243,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ActivityProgressProvider>
-        <UserProvider>
-          <ThemedApplication />
-        </UserProvider>
+        <FocusTimerProvider>
+          <UserProvider>
+            <ThemedApplication />
+          </UserProvider>
+        </FocusTimerProvider>
       </ActivityProgressProvider>
     </SafeAreaProvider>
   );
