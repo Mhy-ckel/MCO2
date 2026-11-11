@@ -7,7 +7,6 @@ import {
   Animated,
   Platform,
 } from "react-native";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../theme/useAppTheme";
@@ -24,6 +23,12 @@ const TABS = [
     label: "Activities",
     icon: "grid-outline",
     activeIcon: "grid",
+  },
+  {
+    key: "Planner",
+    label: "Planner",
+    icon: "calendar-outline",
+    activeIcon: "calendar",
   },
   {
     key: "Profile",
@@ -90,7 +95,7 @@ export default function FloatingTabBar({ state, navigation }) {
       return;
     }
 
-    const tabWidth = pillWidth.current / TABS.length;
+    const tabWidth = (pillWidth.current - 12) / TABS.length;
 
     Animated.spring(indicatorX, {
       toValue: index * tabWidth,
@@ -145,7 +150,7 @@ export default function FloatingTabBar({ state, navigation }) {
     const index = TABS.findIndex((tab) => tab.key === activeTab);
 
     if (index !== -1) {
-      indicatorX.setValue(index * (width / TABS.length));
+      indicatorX.setValue(index * ((width - 12) / TABS.length));
     }
   };
 
@@ -250,7 +255,7 @@ export default function FloatingTabBar({ state, navigation }) {
                 >
                   <Ionicons
                     name={isActive ? tab.activeIcon : tab.icon}
-                    size={22}
+                    size={20}
                     color={isActive ? colors.active : colors.inactive}
                   />
                 </Animated.View>
@@ -290,14 +295,14 @@ const createStyles = (colors, insets) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      width: "88%",
-      maxWidth: 430,
-      height: 68,
-      borderRadius: 34,
+      width: "94%",
+      maxWidth: 460,
+      height: 66,
+      borderRadius: 33,
       backgroundColor: colors.pill,
       borderWidth: 1,
       borderColor: colors.border,
-      paddingHorizontal: 8,
+      paddingHorizontal: 6,
       overflow: "hidden",
       ...Platform.select({
         ios: {
@@ -350,8 +355,8 @@ const createStyles = (colors, insets) =>
       top: 6,
       bottom: 6,
       left: 6,
-      width: "33.333%",
-      borderRadius: 28,
+      width: "25%",
+      borderRadius: 27,
       overflow: "hidden",
     },
     selectionHighlight: {
@@ -378,7 +383,7 @@ const createStyles = (colors, insets) =>
       bottom: 0,
       left: 0,
       right: 0,
-      borderRadius: 28,
+      borderRadius: 27,
       borderWidth: 1,
       borderColor: colors.selectionEdge,
     },
@@ -390,14 +395,14 @@ const createStyles = (colors, insets) =>
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      gap: 3,
+      gap: 2,
     },
     iconContainer: {
       alignItems: "center",
       justifyContent: "center",
     },
     tabLabel: {
-      fontSize: 11,
+      fontSize: 10,
       fontWeight: "600",
       letterSpacing: 0.2,
     },

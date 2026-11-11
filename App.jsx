@@ -25,7 +25,9 @@ import {
 import HomeScreen from "./screens/HomeScreen";
 import ActivitiesScreen from "./screens/ActivitiesScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+import PlannerScreen from "./screens/PlannerScreen";
 import FocusTimerScreen from "./screens/FocusTimerScreen";
+import CalendarScreen from "./screens/CalendarScreen";
 import FloatingTabBar from "./components/FloatingTabBar";
 
 import UsersScreen from "./activities/activity5/UsersScreen";
@@ -35,6 +37,7 @@ import NotesScreen from "./activities/activity7/NotesScreen";
 import { UserContext, UserProvider } from "./activities/activity6/UserContext";
 import { ActivityProgressProvider } from "./context/ActivityProgressContext";
 import { FocusTimerProvider } from "./context/FocusTimerContext";
+import { CalendarProvider } from "./context/CalendarContext";
 
 import { useAppTheme } from "./theme/useAppTheme";
 
@@ -79,6 +82,49 @@ function ActivitiesNavigator() {
         name="Activity7"
         component={NotesScreen}
         options={{ title: "Activity 7: Notes" }}
+      />
+
+      <Stack.Screen
+        name="FocusTimer"
+        component={FocusTimerScreen}
+        options={{ title: "Focus Timer" }}
+      />
+
+      <Stack.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{ title: "Calendar" }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function PlannerNavigator() {
+  const { theme } = useAppTheme();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerTitleAlign: "center",
+        headerTintColor: theme.text,
+        headerStyle: {
+          backgroundColor: theme.surface,
+        },
+        contentStyle: {
+          backgroundColor: theme.background,
+        },
+      }}
+    >
+      <Stack.Screen
+        name="PlannerHome"
+        component={PlannerScreen}
+        options={{ title: "Planner" }}
+      />
+
+      <Stack.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{ title: "Calendar" }}
       />
 
       <Stack.Screen
@@ -148,6 +194,15 @@ function MainTabs() {
         options={{
           headerShown: false,
           tabBarLabel: "Activities",
+        }}
+      />
+
+      <Tab.Screen
+        name="Planner"
+        component={PlannerNavigator}
+        options={{
+          headerShown: false,
+          tabBarLabel: "Planner",
         }}
       />
 
@@ -244,9 +299,11 @@ export default function App() {
     <SafeAreaProvider>
       <ActivityProgressProvider>
         <FocusTimerProvider>
-          <UserProvider>
-            <ThemedApplication />
-          </UserProvider>
+          <CalendarProvider>
+            <UserProvider>
+              <ThemedApplication />
+            </UserProvider>
+          </CalendarProvider>
         </FocusTimerProvider>
       </ActivityProgressProvider>
     </SafeAreaProvider>
