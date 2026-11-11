@@ -28,6 +28,7 @@ import ProfileScreen from "./screens/ProfileScreen";
 import PlannerScreen from "./screens/PlannerScreen";
 import FocusTimerScreen from "./screens/FocusTimerScreen";
 import CalendarScreen from "./screens/CalendarScreen";
+import SettingsScreen from "./screens/SettingsScreen";
 import FloatingTabBar from "./components/FloatingTabBar";
 
 import UsersScreen from "./activities/activity5/UsersScreen";
@@ -38,6 +39,7 @@ import { UserContext, UserProvider } from "./activities/activity6/UserContext";
 import { ActivityProgressProvider } from "./context/ActivityProgressContext";
 import { FocusTimerProvider } from "./context/FocusTimerContext";
 import { CalendarProvider } from "./context/CalendarContext";
+import { PreferencesProvider } from "./context/PreferencesContext";
 
 import { useAppTheme } from "./theme/useAppTheme";
 
@@ -136,6 +138,37 @@ function PlannerNavigator() {
   );
 }
 
+function ProfileNavigator() {
+  const { theme } = useAppTheme();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerTitleAlign: "center",
+        headerTintColor: theme.text,
+        headerStyle: {
+          backgroundColor: theme.surface,
+        },
+        contentStyle: {
+          backgroundColor: theme.background,
+        },
+      }}
+    >
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: "Student Profile" }}
+      />
+
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ title: "Settings" }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function MainTabs() {
   const { theme } = useAppTheme();
 
@@ -208,9 +241,9 @@ function MainTabs() {
 
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileNavigator}
         options={{
-          title: "Student Profile",
+          headerShown: false,
           tabBarLabel: "Profile",
         }}
       />
@@ -297,15 +330,17 @@ function ThemedApplication() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <ActivityProgressProvider>
-        <FocusTimerProvider>
-          <CalendarProvider>
-            <UserProvider>
-              <ThemedApplication />
-            </UserProvider>
-          </CalendarProvider>
-        </FocusTimerProvider>
-      </ActivityProgressProvider>
+      <PreferencesProvider>
+        <ActivityProgressProvider>
+          <FocusTimerProvider>
+            <CalendarProvider>
+              <UserProvider>
+                <ThemedApplication />
+              </UserProvider>
+            </CalendarProvider>
+          </FocusTimerProvider>
+        </ActivityProgressProvider>
+      </PreferencesProvider>
     </SafeAreaProvider>
   );
 }

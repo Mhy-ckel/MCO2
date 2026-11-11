@@ -1,20 +1,24 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
 
+import { Appearance } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const UserContext = createContext(null);
 
+const APPEARANCE_KEY = "@activityhub_appearance_mode";
 const THEME_KEY = "@activityhub_dark_mode";
 const NAME_KEY = "@activityhub_display_name";
 
 export function UserProvider({ children }) {
+  const [appearanceMode, setAppearanceMode] = useState("light");
+  const [systemColorScheme, setSystemColorScheme] = useState(
+    Appearance.getColorScheme() || "light",
+  );
   const [displayName, setDisplayName] = useState("Student");
-  const [darkMode, setDarkMode] = useState(false);
 
   const [themeSaving, setThemeSaving] = useState(false);
   const [nameSaving, setNameSaving] = useState(false);
 
-  // Existing App.jsx waits for this before showing navigation.
   const [themeReady, setThemeReady] = useState(false);
 
   const [themeError, setThemeError] = useState("");
@@ -26,31 +30,64 @@ export function UserProvider({ children }) {
   const nameBusyRef = useRef(false);
   const themeQueueRef = useRef(Promise.resolve());
 
+  const darkMode =
+    appearanceMode === "system"
+      ? systemColorScheme === "dark"
+      : appearanceMode === "dark";
+
+  useEffect(() => {
+    const appearanceSubscription = Appearance.addChangeListener(
+      (appearance) => {
+        setSystemColorScheme(appearance.colorScheme || "light");
+      },
+    );
+
+    return () => {
+      appearanceSubscription.remove();
+    };
+  }, []);
+
   useEffect(() => {
     let active = true;
     mountedRef.current = true;
 
-    async function restoreTheme() {
+    async function restoreAppearance() {
       try {
-        const stored = await AsyncStorage.getItem(THEME_KEY);
+        const storedAppearance = await AsyncStorage.getItem(APPEARANCE_KEY);
 
-        if (stored !== null) {
-          const value = JSON.parse(stored);
+        if (storedAppearance !== null) {
+          const value = JSON.parse(storedAppearance);
+
+          if (!["light", "dark", "system"].includes(value)) {
+            throw new Error("Invalid saved appearance mode.");
+          }
+
+          if (active) {
+            setAppearanceMode(value);
+          }
+
+          return;
+        }
+
+        const storedTheme = await AsyncStorage.getItem(THEME_KEY);
+
+        if (storedTheme !== null) {
+          const value = JSON.parse(storedTheme);
 
           if (typeof value !== "boolean") {
             throw new Error("Invalid saved theme.");
           }
 
           if (active) {
-            setDarkMode(value);
+            setAppearanceMode(value ? "dark" : "light");
           }
         }
       } catch (error) {
-        console.warn("Theme loading failed:", error);
+        console.warn("Appearance loading failed:", error);
 
         if (active) {
           setThemeError(
-            "Could not restore your theme. Light mode is being used.",
+            "Could not restore your appearance. Light mode is being used.",
           );
         }
       }
@@ -83,7 +120,7 @@ export function UserProvider({ children }) {
     }
 
     async function loadSettings() {
-      await Promise.all([restoreTheme(), restoreName()]);
+      await Promise.all([restoreAppearance(), restoreName()]);
 
       if (active) {
         setThemeReady(true);
@@ -102,20 +139,20 @@ export function UserProvider({ children }) {
     };
   }, []);
 
-  function persistTheme(value) {
+  function persistAppearance(value) {
     themeQueueRef.current = themeQueueRef.current.then(async () => {
       try {
-        await AsyncStorage.setItem(THEME_KEY, JSON.stringify(value));
+        await AsyncStorage.setItem(APPEARANCE_KEY, JSON.stringify(value));
 
         if (mountedRef.current) {
           setThemeError("");
         }
       } catch (error) {
-        console.warn("Theme saving failed:", error);
+        console.warn("Appearance saving failed:", error);
 
         if (mountedRef.current) {
           setThemeError(
-            "Theme changed but could not be saved. Toggle again to retry.",
+            "Appearance changed but could not be saved. Please try again.",
           );
         }
       }
@@ -164,7 +201,6 @@ export function UserProvider({ children }) {
     setProfileMessage("");
 
     try {
-      // Only change the shared name after storage succeeds.
       await AsyncStorage.setItem(NAME_KEY, JSON.stringify(cleanedName));
 
       if (mountedRef.current) {
@@ -197,9 +233,20 @@ export function UserProvider({ children }) {
       return false;
     }
 
+    if (
+      typeof changes.appearanceMode === "string" &&
+      ["light", "dark", "system"].includes(changes.appearanceMode)
+    ) {
+      setAppearanceMode(changes.appearanceMode);
+      persistAppearance(changes.appearanceMode);
+      showThemeSavingFeedback();
+    }
+
     if (typeof changes.darkMode === "boolean") {
-      setDarkMode(changes.darkMode);
-      persistTheme(changes.darkMode);
+      const nextAppearanceMode = changes.darkMode ? "dark" : "light";
+
+      setAppearanceMode(nextAppearanceMode);
+      persistAppearance(nextAppearanceMode);
       showThemeSavingFeedback();
     }
 
@@ -220,6 +267,7 @@ export function UserProvider({ children }) {
       value={{
         displayName,
         darkMode,
+        appearanceMode,
         saving: themeSaving || nameSaving,
         nameSaving,
         updateSettings,

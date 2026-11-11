@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import { UserContext } from "../activities/activity6/UserContext";
@@ -9,6 +10,8 @@ export default function ProfileScreen({ navigation }) {
   const { displayName, darkMode } = useContext(UserContext);
   const { hubStyles, theme } = useAppTheme();
   const tabBarHeight = useBottomTabBarHeight();
+
+  const styles = createStyles(theme);
 
   return (
     <ScrollView
@@ -73,7 +76,48 @@ export default function ProfileScreen({ navigation }) {
             <Text style={hubStyles.buttonText}>Edit Dashboard Settings</Text>
           </Pressable>
         </View>
+
+        <Pressable
+          onPress={() => navigation.navigate("Settings")}
+          accessibilityRole="button"
+          accessibilityLabel="Open Settings and Preferences"
+          style={({ pressed }) => [
+            styles.settingsButton,
+            pressed && styles.pressedButton,
+          ]}
+        >
+          <Ionicons name="settings" size={20} color={theme.accent} />
+
+          <Text style={styles.settingsButtonText}>
+            Open Settings & Preferences
+          </Text>
+        </Pressable>
       </View>
     </ScrollView>
   );
 }
+
+const createStyles = (theme) =>
+  StyleSheet.create({
+    settingsButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      backgroundColor: theme.surface,
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 16,
+      paddingVertical: 16,
+      marginTop: 16,
+    },
+    pressedButton: {
+      opacity: 0.75,
+      transform: [{ scale: 0.98 }],
+    },
+    settingsButtonText: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: theme.text,
+    },
+  });
