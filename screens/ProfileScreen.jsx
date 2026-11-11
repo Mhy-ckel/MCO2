@@ -82,15 +82,23 @@ export default function ProfileScreen({ navigation }) {
           accessibilityRole="button"
           accessibilityLabel="Open Settings and Preferences"
           style={({ pressed }) => [
-            styles.settingsButton,
-            pressed && styles.pressedButton,
+            styles.settingsCard,
+            pressed && styles.pressedSettingsCard,
           ]}
         >
-          <Ionicons name="settings" size={20} color={theme.accent} />
+          <View style={styles.settingsIcon}>
+            <Ionicons name="settings" size={20} color={theme.accent} />
+          </View>
 
-          <Text style={styles.settingsButtonText}>
-            Open Settings & Preferences
-          </Text>
+          <View style={styles.settingsContent}>
+            <Text style={styles.settingsTitle}>Settings & Preferences</Text>
+
+            <Text style={styles.settingsDescription}>
+              Manage your app preferences
+            </Text>
+          </View>
+
+          <Ionicons name="chevron-forward" size={20} color={theme.text} />
         </Pressable>
       </View>
     </ScrollView>
@@ -99,25 +107,41 @@ export default function ProfileScreen({ navigation }) {
 
 const createStyles = (theme) =>
   StyleSheet.create({
-    settingsButton: {
+    settingsCard: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "center",
-      gap: 10,
+      gap: 14,
       backgroundColor: theme.surface,
       borderWidth: 1,
       borderColor: theme.border,
-      borderRadius: 16,
-      paddingVertical: 16,
+      borderRadius: 18,
+      padding: 16,
       marginTop: 16,
     },
-    pressedButton: {
-      opacity: 0.75,
-      transform: [{ scale: 0.98 }],
+    pressedSettingsCard: {
+      opacity: 0.8,
+      transform: [{ scale: 0.99 }],
     },
-    settingsButtonText: {
+    settingsIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.background,
+    },
+    settingsContent: {
+      flex: 1,
+      gap: 3,
+    },
+    settingsTitle: {
       fontSize: 15,
       fontWeight: "700",
       color: theme.text,
+    },
+    settingsDescription: {
+      fontSize: 13,
+      color: theme.text,
+      opacity: 0.7,
     },
   });
