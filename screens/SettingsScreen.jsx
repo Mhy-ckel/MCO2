@@ -197,7 +197,7 @@ export default function SettingsScreen() {
       {profileMessage ? (
         <Pressable
           onPress={clearProfileFeedback}
-          accessibilityRole="status"
+          accessibilityRole="text"
           style={styles.successBanner}
         >
           <Text style={styles.successText}>{profileMessage}</Text>

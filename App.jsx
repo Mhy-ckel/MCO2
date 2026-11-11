@@ -155,7 +155,7 @@ function ProfileNavigator() {
       }}
     >
       <Stack.Screen
-        name="Profile"
+        name="ProfileHome"
         component={ProfileScreen}
         options={{ title: "Student Profile" }}
       />
