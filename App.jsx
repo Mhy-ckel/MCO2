@@ -1,3 +1,5 @@
+// App.jsx
+
 import React, { useContext } from "react";
 
 import {
@@ -15,6 +17,7 @@ import {
 } from "@react-navigation/native";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import {
@@ -30,6 +33,7 @@ import FocusTimerScreen from "./screens/FocusTimerScreen";
 import CalendarScreen from "./screens/CalendarScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import FloatingTabBar from "./components/FloatingTabBar";
+import CustomDrawerContent from "./components/CustomDrawerContent";
 
 import UsersScreen from "./activities/activity5/UsersScreen";
 import DashboardTabs from "./activities/activity6/DashboardTabs";
@@ -45,6 +49,7 @@ import { useAppTheme } from "./theme/useAppTheme";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 
 function ActivitiesNavigator() {
   const { theme } = useAppTheme();
@@ -195,13 +200,9 @@ function MainTabs() {
 
           headerRight: () => (
             <Pressable
-              onPress={() =>
-                navigation.navigate("Activities", {
-                  screen: "ActivitiesList",
-                })
-              }
+              onPress={() => navigation.openDrawer()}
               accessibilityRole="button"
-              accessibilityLabel="Open activities menu"
+              accessibilityLabel="Open navigation drawer"
               style={({ pressed }) => ({
                 padding: 12,
                 marginRight: 4,
@@ -307,7 +308,25 @@ function ThemedApplication() {
       <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
 
       <NavigationContainer theme={navigationTheme}>
-        <MainTabs />
+        <Drawer.Navigator
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+          screenOptions={{
+            headerShown: false,
+            swipeEnabled: true,
+            drawerType: "slide",
+            drawerPosition: "left",
+            drawerStyle: {
+              backgroundColor: theme.surface,
+              width: Math.min(320, 0.82 * 400),
+            },
+            overlayColor: "rgba(0, 0, 0, 0.45)",
+            sceneContainerStyle: {
+              backgroundColor: theme.background,
+            },
+          }}
+        >
+          <Drawer.Screen name="MainTabs" component={MainTabs} />
+        </Drawer.Navigator>
       </NavigationContainer>
 
       {themeError ? (

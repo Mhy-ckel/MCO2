@@ -1,0 +1,56 @@
+diff --git a/node_modules/react-native-drawer-layout/lib/module/views/Drawer.native.js b/node_modules/react-native-drawer-layout/lib/module/views/Drawer.native.js
+index f463263..7e9987f 100644
+--- a/node_modules/react-native-drawer-layout/lib/module/views/Drawer.native.js
++++ b/node_modules/react-native-drawer-layout/lib/module/views/Drawer.native.js
+@@ -286,7 +286,7 @@ export function Drawer({
+     return {
+       accessibilityElementsHidden: hidden
+     };
+-  }, [drawerType, progress]);
++  });
+   const drawerContentAnimatedProps = useAnimatedProps(() => {
+     const hidden = drawerType !== 'permanent' && progress.value < 1 - PROGRESS_EPSILON;
+     if (Platform.OS === 'android') {
+@@ -298,7 +298,7 @@ export function Drawer({
+     return {
+       accessibilityElementsHidden: hidden
+     };
+-  }, [drawerType, progress]);
++  });
+   return /*#__PURE__*/_jsx(GestureHandlerRootView, {
+     style: [styles.container, style],
+     children: /*#__PURE__*/_jsx(DrawerProgressContext.Provider, {
+diff --git a/node_modules/react-native-drawer-layout/lib/module/views/Overlay.native.js b/node_modules/react-native-drawer-layout/lib/module/views/Overlay.native.js
+index 8925237..f7cc41d 100644
+--- a/node_modules/react-native-drawer-layout/lib/module/views/Overlay.native.js
++++ b/node_modules/react-native-drawer-layout/lib/module/views/Overlay.native.js
+@@ -1,5 +1,4 @@
+ "use strict";
+-
+ import { Pressable, StyleSheet } from 'react-native';
+ import Animated, { useAnimatedProps, useAnimatedStyle } from 'react-native-reanimated';
+ import { jsx as _jsx } from "react/jsx-runtime";
+@@ -15,19 +14,19 @@ export function Overlay({
+     return {
+       opacity: progress.value
+     };
+-  }, [progress]);
++  });
+   const animatedProps = useAnimatedProps(() => {
+     const active = progress.value > PROGRESS_EPSILON;
+     return {
+       pointerEvents: active ? 'auto' : 'none',
+       'aria-hidden': !active
+     };
+-  }, [progress]);
+-  return /*#__PURE__*/_jsx(Animated.View, {
++  });
++  return /*#__PURE__*/ _jsx(Animated.View, {
+     ...rest,
+     style: [StyleSheet.absoluteFill, styles.overlay, animatedStyle, style],
+     animatedProps: animatedProps,
+-    children: /*#__PURE__*/_jsx(Pressable, {
++    children: /*#__PURE__*/ _jsx(Pressable, {
+       onPress: onPress,
+       style: styles.pressable,
+       role: "button",
